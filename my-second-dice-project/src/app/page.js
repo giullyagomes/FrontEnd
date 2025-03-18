@@ -2,82 +2,90 @@
 
 import { useState } from "react";
 
+const imagensDados = {
+  1: "/face1.png",
+  2: "/face2.png",
+  3: "/face3.png",
+  4: "/face4.png",
+  5: "/face5.png",
+  6: "/face6.png",
+};
+
 function Dado({ valor }) {
-  return <img src={`/face${valor}.png`} alt={`Dado ${valor}`} width={100} height={100} />;
+  return <img src={imagensDados[valor]} alt={`Dado ${valor}`} width={100} height={100} />;
 }
 
-export default function JogoDeDados() {
-  const [rodada, setRodada] = useState(1);
+export default function Home() {
+  const [numeroJogador1, setNumeroJogador1] = useState(1);
+  const [numeroJogador2, setNumeroJogador2] = useState(1);
   const [vitoriasJogador1, setVitoriasJogador1] = useState(0);
   const [vitoriasJogador2, setVitoriasJogador2] = useState(0);
-  const [dadoJogador1, setDadoJogador1] = useState(1);
-  const [dadoJogador2, setDadoJogador2] = useState(1);
-  const [jogoFinalizado, setJogoFinalizado] = useState(false);
+  const [rodada, setRodada] = useState(1);
+  const [mensagem, setMensagem] = useState("");
 
-  function jogarRodada() {
-    if (rodada > 5) return;
+  function rolarDadoJogador1() {
+    setNumeroJogador1(Math.floor(Math.random() * 6) + 1);
+  }
 
-    const novoDado1 = Math.floor(Math.random() * 6) + 1;
-    const novoDado2 = Math.floor(Math.random() * 6) + 1;
+  function rolarDadoJogador2() {
+    setNumeroJogador2(Math.floor(Math.random() * 6) + 1);
+  }
 
-    setDadoJogador1(novoDado1);
-    setDadoJogador2(novoDado2);
+  function finalizarRodada() {
+    if (numeroJogador1 > numeroJogador2) {
+      setVitoriasJogador1(vitoriasJogador1 + 1);
+    } else if (numeroJogador2 > numeroJogador1) {
+      setVitoriasJogador2(vitoriasJogador2 + 1);
+    }
 
-    if (novoDado1 > novoDado2) setVitoriasJogador1(vitoriasJogador1 + 1);
-    else if (novoDado2 > novoDado1) setVitoriasJogador2(vitoriasJogador2 + 1);
-
-    if (rodada === 5) setJogoFinalizado(true);
-    setRodada(rodada + 1);
+    if (rodada < 5) {
+      setRodada(rodada + 1);
+    } else {
+      if (vitoriasJogador1 > vitoriasJogador2) {
+        setMensagem("Jogador 1 venceu o jogo!");
+      } else if (vitoriasJogador2 > vitoriasJogador1) {
+        setMensagem("Jogador 2 venceu o jogo!");
+      } else {
+        setMensagem("Empate!");
+      }
+    }
   }
 
   function resetarJogo() {
-    setRodada(1);
+    setNumeroJogador1(1);
+    setNumeroJogador2(1);
     setVitoriasJogador1(0);
     setVitoriasJogador2(0);
-    setDadoJogador1(1);
-    setDadoJogador2(1);
-    setJogoFinalizado(false);
+    setRodada(1);
+    setMensagem("");
   }
 
   return (
     <div className="flex flex-col items-center justify-center h-screen gap-4">
       <h1 className="text-2xl font-bold">Jogo de Dados</h1>
-      <p className="text-lg">Rodada {rodada > 5 ? 5 : rodada} de 5</p>
-      <div className="flex gap-8">
-        <div className="text-center">
+      <div className="flex gap-10">
+        <div className="flex flex-col items-center">
           <h2>Jogador 1</h2>
-          <Dado valor={dadoJogador1} />
-          <p>Vitórias: {vitoriasJogador1}</p>
+          <Dado valor={numeroJogador1} />
+          <button onClick={rolarDadoJogador1} className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800">Rolar Dado</button>
         </div>
-        <div className="text-center">
+        <div className="flex flex-col items-center">
           <h2>Jogador 2</h2>
-          <Dado valor={dadoJogador2} />
-          <p>Vitórias: {vitoriasJogador2}</p>
+          <Dado valor={numeroJogador2} />
+          <button onClick={rolarDadoJogador2} className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800">Rolar Dado</button>
         </div>
       </div>
-      {jogoFinalizado ? (
-        <>
-          <h2 className="text-xl font-bold">
-            {vitoriasJogador1 > vitoriasJogador2
-              ? "Jogador 1 venceu!"
-              : vitoriasJogador2 > vitoriasJogador1
-              ? "Jogador 2 venceu!"
-              : "Empate!"}
-          </h2>
-          <button
-            onClick={resetarJogo}
-            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-700"
-          >
-            Jogar Novamente
-          </button>
-        </>
-      ) : (
-        <button
-          onClick={jogarRodada}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700"
-        >
-          Jogar Rodada
-        </button>
+      <button onClick={finalizarRodada} className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800">Finalizar Rodada</button>
+      <div className="mt-4 text-center">
+        <p className="text-lg font-semibold">Placar:</p>
+        <p>Jogador 1: {vitoriasJogador1} vitórias</p>
+        <p>Jogador 2: {vitoriasJogador2} vitórias</p>
+      </div>
+      {mensagem && (
+        <div className="text-xl font-bold mt-4">
+          <p>{mensagem}</p>
+          <button onClick={resetarJogo} className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 mt-2">Jogar Novamente</button>
+        </div>
       )}
     </div>
   );
